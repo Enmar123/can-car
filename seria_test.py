@@ -20,9 +20,6 @@ while True:
 	#sleep(.01)
 	#print(data)
 	data = str(int (ser.readline(),10))
-	#sleep(.01)
-	#if okay == False:						# Testing to see if fixes error
-		#continue
 	#print(data)
 	data = int(data)
 	print(data)
@@ -31,6 +28,8 @@ while True:
 	
 	if (mult).is_integer():
 		print('Hey this number is a multiple of 10!')
+		ser.write('25')
+		
 	if(data == 10):
 		print('Hey look a FRIGGING 10')
 		
