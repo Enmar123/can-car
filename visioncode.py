@@ -13,6 +13,8 @@ frame_h_pix = 480
 
 safezone_pix = 100
 
+hudcolor = (255,255,255)
+
 # PROGRAM SETUP --------------------------------------------------------
  
 import cv2 as cv
@@ -108,8 +110,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 	ymid = int(frame_h_pix/2)
 	offset = int(safezone_pix/2)
 	
-	cv.line(hud, (xmid-offset, 1), (xmid-offset, frame_h_pix), (0,0,0), 5)
-	cv.line(hud, (xmid+offset, 1), (xmid+offset, frame_w_pix), (0,0,0), 5)
+	cv.line(hud, (xmid-offset, 1), (xmid-offset, frame_h_pix), hudcolor, 5)
+	cv.line(hud, (xmid+offset, 1), (xmid+offset, frame_w_pix), hudcolor, 5)
 	
 	cv.circle(hud, (xmid,ymid), 6, (0,0,255), 3)
 	

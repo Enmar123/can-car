@@ -8,39 +8,41 @@ s = [0,1]
 sleep(.1)
 q = (0,1)
 
-while True:
-	#read_serial=ser.readline()
-	#s[0] = str(int (ser.readline(),16)) #16 = hexa!
-	#print(s[0])
-	#print(s)
+# PI -> INO chars (works) ----------------------------------------------
+#while True:
+	#var1 = 'A'
+	#var2 = 'B'
 	
-	
-	#data = ser.readline()
-	#data = ser.readline()
-	#sleep(.01)
-	#print(data)
-	data = str(int (ser.readline(),10))
-	#print(data)
-	data = int(data)
-	print(data)
-	
-	mult = data/10
-	
-	if (mult).is_integer():
-		print('Hey this number is a multiple of 10!')
-		ser.write('25')
-		
-	if(data == 10):
-		print('Hey look a FRIGGING 10')
-		
-	
-	#sleep(.01)
-	
-	#data = ser.readline()
-	#print(data)
-	
-	#print(read_serial)
+	#ser.write(bytes(var1, 'UTF-8'))
+	#sleep(1)
+	#ser.write(bytes(var2, 'UTF-8'))
+	#sleep(1)
 
-	#if( a == data):
-		#print('hey look an a!!')
+# INO -> PI char (works)------------------------------------------------
+
+datastore = [1,1]
+while True:
+	datain = ser.readline()
+	datain = chr(int(datain, 16))
+	print(datain)
+
+	if(datain == 'B'):
+		print('IT REGISTERS MWAHAHAH!')
+
+
+
+while True:
+	datain = str(int (ser.readline(),16))
+	print(datain)
+
+## INO -> PI nums (works) -----------------------------------------------
+#while True:
+	#datain = str(int (ser.readline(),16)
+	#datain = int(datain)
+	#print(datain)
+	
+	#mult = datain/10
+	#if (mult).is_integer():
+		#print('Hey this number is a multiple of 10!')
+	
 	
