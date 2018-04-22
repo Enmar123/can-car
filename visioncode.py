@@ -24,9 +24,9 @@ import time
 # RASPI AND ARDUCAM
 from picamera.array import PiRGBArray
 from picamera import PiCamera
-#import serial
+import serial
 
-#ser = serial.Serial('/dev/ttyACM0',9600) 	# 
+ser = serial.Serial('/dev/ttyACM0',9600)
 
 
 
@@ -55,7 +55,7 @@ def weightfcn( x ):
 camera = PiCamera()
 camera.vflip = True
 camera.resolution = (frame_w_pix, frame_h_pix)
-camera.framerate = 32
+camera.framerate = 24
 rawCapture = PiRGBArray(camera, size=(frame_w_pix, frame_h_pix))
  
 # allow the camera to warmup
@@ -64,11 +64,12 @@ time.sleep(0.1)
 
 	
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+	t0 = time.time()
 	image = frame.array
 	
 	# Exit if any key is pressed
 	key = cv.waitKey(1) & 0xFF
-	if key == ord("p"):
+	if key == ord("q"):
 		cv.destroyAllWindows()
 		break
 	
@@ -117,16 +118,32 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 	
 	cv.circle(hud, (x,y), 10, (0,0,255), 10)
 	
+	# PI->INO Char Data out
+	
+	if(x == -100):
+		dataout = 'O'
+	elif(x >= (xmid+offset)):
+		dataout = 'L'
+	elif(x <= (xmid-offset)):
+		dataout = 'R'
+	else:
+		dataout = 'M'
+	
+	ser.write(bytes(dataout, 'UTF-8'))
 	
 	# Feedback
 	#cv.imshow('Default Video Feed', image)
 	#cv.imshow('Color Mask', mask)
 	cv.imshow('Display HUD', hud)
+	t1 = time.time()
+	total = t1-t0
 	
-	
+	print('--------------------------------------')
 	print('Number of white pixels:', n_white_pix)
 	print('Centroid Location (X,Y)', [x,y])
 	print('PWM Speed Weight       ', weight)
+	print('Char Data out          ', dataout)
+	print('Cycle time             ', total)
 	
 	#print('Size of image box      ', [rows, columns])
 	#print('Arduino Data'		   , ino_data)				# not working yet
