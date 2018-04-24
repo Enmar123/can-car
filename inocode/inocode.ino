@@ -26,6 +26,44 @@ int Trig = A5;
 int rightDistance = 0, leftDistance = 0, middleDistance = 0;
 
 // Function Setup -----------------------------------------
+void avoidR(){ 
+  right();
+  delay(turntime+40);
+  forward();              //go forward
+  delay(forwardtime);          //delay 1000 ms
+  left();                 //turning left
+  delay(turntime);
+  forward();              //go forward
+  delay(forwardtime);          //delay 1000 ms
+  left();                 //turning left
+  delay(turntime);
+  forward();              //go forward
+  delay(forwardtime-750);      //delay 1000 ms
+  //right();                //turning left
+  //delay(turntime);
+  //forward();              //go forward
+  //delay(forwardtime-750);      //delay 1000 ms
+}
+
+void avoidL(){
+  left();
+  delay(turntime+40);
+  forward();              //go forward
+  delay(forwardtime);          //delay 1000 ms
+  right();                //turning left
+  delay(turntime);
+  forward();              //go forward
+  delay(forwardtime);          //delay 1000 ms
+  right();                //turning left
+  delay(turntime);
+  forward();              //go forward
+  delay(forwardtime-750);      //delay 1000 ms
+  //left();                 //turning left
+  //delay(turntime);
+  //forward();              //go forward
+  //delay(forwardtime-750);      //delay 1000 ms
+}
+
 void forward(){ 
   analogWrite(ENA, carSpeed);
   analogWrite(ENB, carSpeed);
@@ -84,6 +122,8 @@ int Distance_test() {
   return (int)Fdistance;
 }  
 
+//----------------------------------------------------------------
+
 void setup(){
   myservo.attach(3);  // attach servo on pin 3 to servo object
   Serial.begin(9600);
@@ -126,41 +166,12 @@ if(middleDistance <= 27) {
       delay(500);
       myservo.write(90);     //initial 90/modified to 125         
       delay(1000);
+      
       if(rightDistance > leftDistance) {
-        right();
-        delay(turntime+40);
-          forward();  //go forward
-          delay(forwardtime);//delay 1000 ms
-            left();     //turning left
-            delay(turntime);
-              forward();  //go forward
-              delay(forwardtime);//delay 1000 ms
-                left();     //turning left
-                delay(turntime);
-                  forward();  //go forward
-                  delay(forwardtime-750);//delay 1000 ms
-                    right();     //turning left
-                    delay(turntime);
-                      forward();  //go forward
-                      delay(forwardtime-750);//delay 1000 ms
+        avoidR();
       }
       else if(rightDistance < leftDistance) {
-        left();
-        delay(turntime+40);
-          forward();  //go forward
-          delay(forwardtime);//delay 1000 ms
-            right();     //turning left
-            delay(turntime);
-              forward();  //go forward
-              delay(forwardtime);//delay 1000 ms
-                right();     //turning left
-                delay(turntime);
-                  forward();  //go forward
-                  delay(forwardtime-750);//delay 1000 ms
-                    left();     //turning left
-                    delay(turntime);
-                      forward();  //go forward
-                      delay(forwardtime-750);//delay 1000 ms
+        avoidL();
       }
       else if((rightDistance <= 20) || (leftDistance <= 20)) {
         back();
