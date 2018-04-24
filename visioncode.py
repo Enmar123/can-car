@@ -84,12 +84,26 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 	#color = 64 * (176/255) 				# Yellow bag color
 	#color = 155 * (176/360)
 	#color = 97 * (176/360)
-	color = 200 * (176/360) 			# Blue plastic bag
+	#color = 200 * (176/360) 			# Blue plastic bag
+	color1 = 0 * (179/360)				# Red Coca-Cola Can
+	color2 = 360 * (179/360)			# Red Coca-Cola Can
 	
-	colorLower = (color - 20, 80, 80)
-	colorUpper = (color + 20, 255, 255)
+	margin = 5
 	
-	mask = cv.inRange(hsv, colorLower, colorUpper)
+	bound1_low = (color1 - margin, 80, 80)
+	bound1_up = (color1 + margin, 255, 255)
+
+	bound2_low = (color2 - margin, 80, 80)
+	bound2_up = (color2 + margin, 255, 255)
+	
+	#colorLower = (color - 10, 80, 80)
+	#colorUpper = (color + 10, 255, 255)
+	
+	mask1 = cv.inRange(hsv, bound1_low,bound1_up )
+	mask2 = cv.inRange(hsv, bound2_low, bound2_up)
+	mask = mask1 + mask2
+	
+	#mask = cv.inRange(hsv, colorLower, colorUpper)
 	mask = cv.erode(mask, None, iterations = 2)
 	mask = cv.dilate(mask, None, iterations = 2)
 	
@@ -133,7 +147,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 	
 	# Feedback
 	#cv.imshow('Default Video Feed', image)
-	#cv.imshow('Color Mask', mask)
+	cv.imshow('Color Mask', mask)
 	cv.imshow('Display HUD', hud)
 	t1 = time.time()
 	total = t1-t0
