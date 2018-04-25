@@ -19,19 +19,25 @@ int Trig = A5;
 char datain = ' ';
 int a = 0;
 int mod_delay;
+int turnSpeed;
 
 // USER INPUTS --------------------------------------------
 
 #define carSpeed 150
+#define turnSpeed1 150
+#define turnSpeed2 250
 #define delay1 100
-#define turnSpeed 250
-#define turntime 360
+#define turntime 360        
 #define forwardtime 2150
+
 int rightDistance = 0, leftDistance = 0, middleDistance = 0;
+
 
 
 // Function Setup -----------------------------------------
 void avoidR(){ 
+  turnSpeed = turnSpeed2;
+  
   right();
   delay(turntime+40);
   forward();              //go forward
@@ -44,6 +50,9 @@ void avoidR(){
   delay(turntime);
   forward();              //go forward
   delay(forwardtime-750);      //delay 1000 ms
+  
+  turnSpeed = turnSpeed1;
+  
   //right();                //turning left
   //delay(turntime);
   //forward();              //go forward
@@ -51,6 +60,8 @@ void avoidR(){
 }
 
 void avoidL(){
+  turnSpeed = turnSpeed2;
+  
   left();
   delay(turntime+40);
   forward();              //go forward
@@ -63,6 +74,9 @@ void avoidL(){
   delay(turntime);
   forward();              //go forward
   delay(forwardtime-750);      //delay 1000 ms
+  
+  turnSpeed = turnSpeed1;
+  
   //left();                 //turning left
   //delay(turntime);
   //forward();              //go forward
@@ -90,8 +104,8 @@ void back() {
 }
 
 void left() {
-  analogWrite(ENA, carSpeed);
-  analogWrite(ENB, carSpeed);
+  analogWrite(ENA, turnSpeed);
+  analogWrite(ENB, turnSpeed);
   analogWrite(IN1, 0);
   analogWrite(IN2, 255);
   analogWrite(IN3, 0);
@@ -100,8 +114,8 @@ void left() {
 }
 
 void right() {
-  analogWrite(ENA, carSpeed);
-  analogWrite(ENB, carSpeed);
+  analogWrite(ENA, turnSpeed);
+  analogWrite(ENB, turnSpeed);
   analogWrite(IN1, 255);
   analogWrite(IN2, 0);
   analogWrite(IN3, 255);
@@ -155,8 +169,9 @@ void loop() {
   // PI->INO Serial in 
   if(Serial.available()){
   datain = char(Serial.read());
-  //delay(100);
   }
+  
+  // OBSTACLE AVOIDANCE---------------------
   
   //myservo.write(90);  //(initial 90/modified to 125)setservo position according to scaled value
   //delay(500); 
@@ -180,15 +195,20 @@ void loop() {
       myservo.write(90);     //initial 90/modified to 125         
       delay(1000);
       
-      if(rightDistance > leftDistance) {
-        avoidR();
-      }
-      else if(rightDistance < leftDistance) {
-        avoidL();
-      }
-      else if((rightDistance <= 20) || (leftDistance <= 20)) {
-        back();
-        delay(180);
+      //Double checking incase object moved away
+      middleDistance = Distance_test(); 
+      
+      if(middleDistance <= 27){
+        if(rightDistance > leftDistance) {
+          avoidR();
+        }
+        else if(rightDistance < leftDistance) {
+          avoidL();
+        }
+        else if((rightDistance <= 20) || (leftDistance <= 20)) {
+          back();
+          delay(180);
+        }
       }
   }
 
@@ -221,7 +241,7 @@ void loop() {
   forward();
   delay(25);
 
-// Post Loop Calcs -------
+// Post Loop Calculations -------------
   
   if(a > 6){
     a = 6;
