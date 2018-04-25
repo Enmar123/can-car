@@ -15,6 +15,8 @@ int Trig = A5;
 #define IN2 8
 #define IN3 9
 #define IN4 11
+#define IN12 12
+#define IN13 13
 
 char datain = ' ';
 int a = 0;
@@ -139,7 +141,22 @@ int Distance_test() {
   float Fdistance = pulseIn(Echo, HIGH);  
   Fdistance= Fdistance / 58;       
   return (int)Fdistance;
-}  
+}
+
+//Claw functions
+void close() {
+  digitalWrite(IN12, HIGH);
+  digitalWrite(IN13, LOW);
+  Serial.println("Open sesame!");
+  delay(2000);
+}
+
+void open() {
+  digitalWrite(IN12, LOW);
+  digitalWrite(IN13, HIGH);
+  Serial.println("Chomp!");
+  delay(1500);
+} 
 
 //----------------------------------------------------------------
 
@@ -171,6 +188,12 @@ void loop() {
   datain = char(Serial.read());
   }
   
+  // VISION BEHAVIOR -----------------------
+  
+  //...
+  //...
+  //...
+ 
   // OBSTACLE AVOIDANCE---------------------
   
   //myservo.write(90);  //(initial 90/modified to 125)setservo position according to scaled value
@@ -258,14 +281,18 @@ void loop() {
   unsigned long loopend = millis();
   unsigned long looptime = loopend - loopstart;
   
+  // Serial Feedback -------------------------
+  
   Serial.println("------------------");
   Serial.print("looptime = ");
   Serial.println(looptime);
   //Serial.println(ElapsedTime);
   //Serial.println(CurrentTime);
-  Serial.print("data in =");
+  Serial.print("data in = ");
   Serial.println(datain);
   Serial.print("mod_delay = ");
-  Serial.println(mod_delay);      
+  Serial.println(mod_delay);
+  Serial.print("middleDistance = ");
+  Serial.println(middleDistance);  
  
 }  
