@@ -21,13 +21,13 @@ int Trig = A5;
 char datain = 'O';
 int a = 0;
 int mod_delay;
-int turnSpeed;
+int turnSpeed = 200;
 
 // USER INPUTS --------------------------------------------
 
 #define carSpeed 150
 #define carspeed2 100
-#define turnSpeed1 150
+#define turnSpeed1 200
 #define turnSpeed2 250
 #define delay1 100
 #define turntime 360        
@@ -38,23 +38,6 @@ int rightDistance = 0, leftDistance = 0, middleDistance = 0;
 
 
 // Function Setup -----------------------------------------
-void colorF(){
-  forward();
-  delay(250);
-}
-
-void colorR(){
-  
-  
-  right();
-  delay(40);
-}
-void colorL(){
-  
-  
-  left();
-  delay(40);
-}
 
 void avoidR(){ 
   turnSpeed = turnSpeed2;
