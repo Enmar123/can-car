@@ -18,7 +18,7 @@ int Trig = A5;
 #define IN12 12
 #define IN13 13
 
-char datain = ' ';
+char datain = 'O';
 int a = 0;
 int mod_delay;
 int turnSpeed;
@@ -26,6 +26,7 @@ int turnSpeed;
 // USER INPUTS --------------------------------------------
 
 #define carSpeed 150
+#define carspeed2 100
 #define turnSpeed1 150
 #define turnSpeed2 250
 #define delay1 100
@@ -37,6 +38,24 @@ int rightDistance = 0, leftDistance = 0, middleDistance = 0;
 
 
 // Function Setup -----------------------------------------
+void colorF(){
+  forward();
+  delay(250);
+}
+
+void colorR(){
+  
+  
+  right();
+  delay(40);
+}
+void colorL(){
+  
+  
+  left();
+  delay(40);
+}
+
 void avoidR(){ 
   turnSpeed = turnSpeed2;
   
@@ -195,19 +214,26 @@ void loop() {
   
   // VISION BEHAVIOR -----------------------
   
-  if(datain != '0'){
-  
-  
+  if(datain != 'O'){
+    
+    middleDistance = Distance_test();
+    if(middleDistance <= 27){
+      stop();
+    }
+    else if(datain == 'M'){
+      forward();
+      Serial.println("Following forward!");
+      }
+    else if(datain == 'R'){
+      right();
+      Serial.println("Following Right!");
+    }
+    else if(datain == 'L'){
+      left();
+      Serial.println("Following left!");
+    }
   }
   else if(datain == 'O'){
-  
-  
-  }
-  
-  //...
-  //...
-  //...
- 
   // OBSTACLE AVOIDANCE---------------------
   
   //myservo.write(90);  //(initial 90/modified to 125)setservo position according to scaled value
@@ -277,6 +303,7 @@ void loop() {
   
   forward();
   delay(25);
+  
 
 // Post Loop Calculations -------------
   
@@ -308,5 +335,5 @@ void loop() {
   Serial.println(mod_delay);
   Serial.print("middleDistance = ");
   Serial.println(middleDistance);  
- 
+  }
 }  

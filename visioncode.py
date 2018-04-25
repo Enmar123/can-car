@@ -143,7 +143,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 	else:
 		dataout = 'M'
 	
-	ser.write(bytes(dataout, 'UTF-8'))
+	ser.write(bytes(dataout)) #, 'UTF-8'
 	
 	# Feedback
 	#cv.imshow('Default Video Feed', image)
