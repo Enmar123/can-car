@@ -16,6 +16,10 @@ int Trig = A5;
 #define IN3 9
 #define IN4 11
 
+char datain = ' ';
+int a = 0;
+int mod_delay;
+
 // USER INPUTS --------------------------------------------
 
 #define carSpeed 150
@@ -24,8 +28,7 @@ int Trig = A5;
 #define turntime 360
 #define forwardtime 2150
 int rightDistance = 0, leftDistance = 0, middleDistance = 0;
-int a = 0;
-int mod_delay;
+
 
 // Function Setup -----------------------------------------
 void avoidR(){ 
@@ -147,8 +150,13 @@ void setup(){
 
 // Note: Black line = 1 or high
 void loop() { 
-  
   unsigned long loopstart = millis();
+  
+  // PI->INO Serial in 
+  if(Serial.available()){
+  datain = char(Serial.read());
+  //delay(100);
+  }
   
   //myservo.write(90);  //(initial 90/modified to 125)setservo position according to scaled value
   //delay(500); 
@@ -233,12 +241,11 @@ void loop() {
   Serial.println("------------------");
   Serial.print("looptime = ");
   Serial.println(looptime);
-  Serial.println(ElapsedTime);
-  Serial.println(CurrentTime);
+  //Serial.println(ElapsedTime);
+  //Serial.println(CurrentTime);
+  Serial.print("data in =");
+  Serial.println(datain);
   Serial.print("mod_delay = ");
   Serial.println(mod_delay);      
-  
-  
-  
-  
+ 
 }  

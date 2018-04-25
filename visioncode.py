@@ -166,6 +166,6 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 	
 # Clean resources
 rawCapture.truncate(0)
-cap.release()
+#cap.release()
 cv.destroyAllWindows()
 print("Program Terminated.")
