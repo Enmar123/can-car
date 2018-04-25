@@ -13,11 +13,15 @@
 #define IN3 9
 #define IN4 11
 
+
+
 // USER INPUTS --------------------------------------------
 
 #define carSpeed1 150 // default 150
 #define carSpeed2 150 // default 150
 #define delay1 100
+int a = 0;
+int mod_delay;
 
 // Function Setup -----------------------------------------
 
@@ -85,26 +89,46 @@ void loop() {
   if((LT_R==0 && LT_M==0 && LT_L==0) || (LT_R==1 && LT_M==1 && LT_L==1)){
     forward();
   }
-  else if(LT_R==1 && LT_M==0 && LT_L==1){
+  else if(LT_R==0 && LT_M==1 && LT_L==0){
     forward();
+    a=a-1;
   }
   else if((LT_R==1 && LT_M==0 && LT_L==0) || (LT_R==1 && LT_M==1 && LT_L==0)) { 
     right();
-    delay(delay1);
+    a=a+1;
+    delay(mod_delay);
     //while(LT_R==1);                             
   }   
   else if((LT_R==0 && LT_M==0 && LT_L==1) || (LT_R==0 && LT_M==1 && LT_L==1)) {
     left();
-    delay(delay1);
+    a=a+1;
+    delay(mod_delay);
     //while(LT_L==1);  
   }
-  else if(LT_R==0 && LT_M==1 && LT_L==0) {  
+  else if(LT_R==1 && LT_M==0 && LT_L==1) {  
     right();
+    delay(delay1);
   }
+  
+  forward();
+  delay(25);
+  
+  if(a > 6){
+    a = 6;
+  }
+  else if(a < 0){
+    a = 0;
+  }
+  
+  mod_delay = delay1 + a*25;
   
   unsigned long CurrentTime = millis();
   unsigned long ElapsedTime = CurrentTime - StartTime;
+  
+  Serial.println("------------------");
   Serial.println(ElapsedTime);
   Serial.println(CurrentTime);
+  Serial.print("mod_delay = ");
+  Serial.println(mod_delay);
 }
 
