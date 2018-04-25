@@ -24,6 +24,8 @@ int Trig = A5;
 #define turntime 360
 #define forwardtime 2150
 int rightDistance = 0, leftDistance = 0, middleDistance = 0;
+int a = 0;
+int mod_delay;
 
 // Function Setup -----------------------------------------
 void avoidR(){ 
@@ -85,8 +87,8 @@ void back() {
 }
 
 void left() {
-  analogWrite(ENA, turnSpeed);
-  analogWrite(ENB, turnSpeed);
+  analogWrite(ENA, carSpeed);
+  analogWrite(ENB, carSpeed);
   analogWrite(IN1, 0);
   analogWrite(IN2, 255);
   analogWrite(IN3, 0);
@@ -95,8 +97,8 @@ void left() {
 }
 
 void right() {
-  analogWrite(ENA, turnSpeed);
-  analogWrite(ENB, turnSpeed);
+  analogWrite(ENA, carSpeed);
+  analogWrite(ENB, carSpeed);
   analogWrite(IN1, 255);
   analogWrite(IN2, 0);
   analogWrite(IN3, 255);
@@ -145,11 +147,14 @@ void setup(){
 
 // Note: Black line = 1 or high
 void loop() { 
-   //myservo.write(90);  //(initial 90/modified to 125)setservo position according to scaled value
-    //delay(500); 
-    middleDistance = Distance_test();
+  
+  unsigned long loopstart = millis();
+  
+  //myservo.write(90);  //(initial 90/modified to 125)setservo position according to scaled value
+  //delay(500); 
+  middleDistance = Distance_test();
 
-if(middleDistance <= 27) {     
+  if(middleDistance <= 27) {     
       stop();
       delay(500);                         
       myservo.write(10);          
@@ -178,17 +183,62 @@ if(middleDistance <= 27) {
         delay(180);
       }
   }
-      
-  else if(LT_M ){
+
+// LINE TRACKING ----------------------
+  
+  unsigned long StartTime = millis();
+  
+  if((LT_R==0 && LT_M==0 && LT_L==0) || (LT_R==1 && LT_M==1 && LT_L==1)){
     forward();
   }
-  else if(LT_R || (LT_R && LT_M)) { 
-    right();
-    while(LT_R);                             
-  }   
-  else if(LT_L || (LT_L && LT_M)) {
-    left();
-    while(LT_L);  
+  else if(LT_R==0 && LT_M==1 && LT_L==0){
+    forward();
+    a=a-1;
   }
+  else if((LT_R==1 && LT_M==0 && LT_L==0) || (LT_R==1 && LT_M==1 && LT_L==0)) { 
+    right();
+    a=a+1;
+    delay(mod_delay);                             
+  }   
+  else if((LT_R==0 && LT_M==0 && LT_L==1) || (LT_R==0 && LT_M==1 && LT_L==1)) {
+    left();
+    a=a+1;
+    delay(mod_delay);  
+  }
+  else if(LT_R==1 && LT_M==0 && LT_L==1) {  
+    right();
+    delay(delay1);
+  }
+  
+  forward();
+  delay(25);
 
+// Post Loop Calcs -------
+  
+  if(a > 6){
+    a = 6;
+  }
+  else if(a < 0){
+    a = 0;
+  }
+  
+  mod_delay = delay1 + a*25;
+  
+  unsigned long CurrentTime = millis();
+  unsigned long ElapsedTime = CurrentTime - StartTime;
+  
+  unsigned long loopend = millis();
+  unsigned long looptime = loopend - loopstart;
+  
+  Serial.println("------------------");
+  Serial.print("looptime = ");
+  Serial.println(looptime);
+  Serial.println(ElapsedTime);
+  Serial.println(CurrentTime);
+  Serial.print("mod_delay = ");
+  Serial.println(mod_delay);      
+  
+  
+  
+  
 }  
