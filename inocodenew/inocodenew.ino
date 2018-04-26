@@ -131,7 +131,19 @@ void stop() {
   digitalWrite(ENA, LOW);
   digitalWrite(ENB, LOW);
   Serial.println("Stop!");
-} 
+}
+
+void merge() {
+  int test = 0;
+  while(test == 0){
+    Serial.println("Merging!");
+    forward();
+    if(LT_M==1){
+      test = 1;
+    }
+  }
+}
+    
 
 //Ultrasonic distance measurement Sub function
 int Distance_test() {
@@ -277,9 +289,11 @@ void loop() {
       if(middleDistance <= 27){
         if(rightDistance > leftDistance) {
           avoidR();
+          merge();
         }
         else if(rightDistance < leftDistance) {
           avoidL();
+          merge();
         }
         else if((rightDistance <= 20) || (leftDistance <= 20)) {
           back();
