@@ -22,6 +22,7 @@ char datain = 'O';
 int a = 0;
 int mod_delay;
 int turnSpeed = 200;
+int fetch = 0;
 
 // USER INPUTS --------------------------------------------
 
@@ -30,7 +31,7 @@ int turnSpeed = 200;
 #define turnSpeed1 200
 #define turnSpeed2 250
 #define delay1 100
-#define turntime 720        
+#define turntime 720              // ???=90deg on FIU floor
 #define forwardtime 2150
 
 int rightDistance = 0, leftDistance = 0, middleDistance = 0;
@@ -206,6 +207,8 @@ void setup(){
 void loop() { 
   unsigned long loopstart = millis();
   
+  turnSpeed = turnSpeed1;
+  
   // PI->INO Serial in 
   while(Serial.available()){
   datain = char(Serial.read());
@@ -239,8 +242,14 @@ void loop() {
         open();
         delay(500);
         forward();
-        delay(500);
+        delay(2000);
+        stop();
         close();
+        delay(1000);
+        right();
+        delay(turntime*2);
+        merge();
+        fetch = 1;
       }
       else{
         forward();
