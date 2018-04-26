@@ -30,7 +30,7 @@ int turnSpeed = 200;
 #define turnSpeed1 200
 #define turnSpeed2 250
 #define delay1 100
-#define turntime 360        
+#define turntime 720        
 #define forwardtime 2150
 
 int rightDistance = 0, leftDistance = 0, middleDistance = 0;
@@ -43,17 +43,17 @@ void avoidR(){
   turnSpeed = turnSpeed2;
   
   right();
-  delay(turntime+40);
-  forward();              //go forward
-  delay(forwardtime);          //delay 1000 ms
-  left();                 //turning left
   delay(turntime);
   forward();              //go forward
   delay(forwardtime);          //delay 1000 ms
   left();                 //turning left
   delay(turntime);
   forward();              //go forward
-  delay(forwardtime-750);      //delay 1000 ms
+  delay(forwardtime);          //delay 1000 ms
+  left();                 //turning left
+  delay(turntime/2);
+  //forward();              //go forward
+  //delay(forwardtime-750);      //delay 1000 ms
   
   turnSpeed = turnSpeed1;
   
@@ -67,17 +67,17 @@ void avoidL(){
   turnSpeed = turnSpeed2;
   
   left();
-  delay(turntime+40);
-  forward();              //go forward
-  delay(forwardtime);          //delay 1000 ms
-  right();                //turning left
   delay(turntime);
   forward();              //go forward
   delay(forwardtime);          //delay 1000 ms
   right();                //turning left
   delay(turntime);
   forward();              //go forward
-  delay(forwardtime-750);      //delay 1000 ms
+  delay(forwardtime);          //delay 1000 ms
+  right();                //turning left
+  delay(turntime/2);
+  //forward();              //go forward
+  //delay(forwardtime-750);      //delay 1000 ms
   
   turnSpeed = turnSpeed1;
   
@@ -149,15 +149,19 @@ int Distance_test() {
 void close() {
   digitalWrite(IN12, HIGH);
   digitalWrite(IN13, LOW);
-  Serial.println("Open sesame!");
-  delay(2000);
+  Serial.println("Chomp!");
+  delay(1500);
+  digitalWrite(IN12, LOW);
+  digitalWrite(IN13, LOW);
 }
 
 void open() {
   digitalWrite(IN12, LOW);
   digitalWrite(IN13, HIGH);
-  Serial.println("Chomp!");
-  delay(1500);
+  Serial.println("Open sesame!");
+  delay(2200);
+  digitalWrite(IN12, LOW);
+  digitalWrite(IN13, LOW);
 } 
 
 //----------------------------------------------------------------
@@ -191,22 +195,46 @@ void loop() {
   unsigned long loopstart = millis();
   
   // PI->INO Serial in 
-  if(Serial.available()){
+  while(Serial.available()){
   datain = char(Serial.read());
   }
   
   // VISION BEHAVIOR -----------------------
   
   if(datain != 'O'){
-    
+    Serial.println("-----VISION BEHAVIOR-----");
+  /*  
     middleDistance = Distance_test();
+    
     if(middleDistance <= 27){
       stop();
-    }
-    else if(datain == 'M'){
-      forward();
-      Serial.println("Following forward!");
+      
+      if (datain == 'M'){
+        open();
+        delay(500);
+        forward();
+        delay(500);
+        close();       
       }
+    }
+  */
+    if(datain == 'M'){
+      
+      middleDistance = Distance_test();
+      
+      if(middleDistance <= 27){
+        stop();
+        open();
+        delay(500);
+        forward();
+        delay(500);
+        close();
+      }
+      else{
+        forward();
+        Serial.println("Following forward!");
+      }
+    }
     else if(datain == 'R'){
       right();
       Serial.println("Following Right!");
@@ -223,7 +251,9 @@ void loop() {
   //delay(500); 
   middleDistance = Distance_test();
 
-  if(middleDistance <= 27) {     
+  if(middleDistance <= 27) {
+  Serial.println("-----AVOID BEHAVIOR-----");
+  
       stop();
       delay(500);                         
       myservo.write(10);          
@@ -259,6 +289,8 @@ void loop() {
   }
 
 // LINE TRACKING ----------------------
+
+  Serial.println("-----LINE BEHAVIOR-----");
   
   unsigned long StartTime = millis();
   
@@ -286,7 +318,7 @@ void loop() {
   
   forward();
   delay(25);
-  
+  }
 
 // Post Loop Calculations -------------
   
@@ -299,15 +331,15 @@ void loop() {
   
   mod_delay = delay1 + a*25;
   
-  unsigned long CurrentTime = millis();
-  unsigned long ElapsedTime = CurrentTime - StartTime;
+  //unsigned long CurrentTime = millis();
+  //unsigned long ElapsedTime = CurrentTime - StartTime;
   
   unsigned long loopend = millis();
   unsigned long looptime = loopend - loopstart;
   
   // Serial Feedback -------------------------
   
-  Serial.println("------------------");
+  Serial.println("");
   Serial.print("looptime = ");
   Serial.println(looptime);
   //Serial.println(ElapsedTime);
@@ -318,5 +350,4 @@ void loop() {
   Serial.println(mod_delay);
   Serial.print("middleDistance = ");
   Serial.println(middleDistance);  
-  }
 }  

@@ -145,9 +145,9 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 	
 	ser.write(bytes(dataout)) #, 'UTF-8'
 	
-	# Feedback
+	# Feedback ----------
 	#cv.imshow('Default Video Feed', image)
-	cv.imshow('Color Mask', mask)
+	#cv.imshow('Color Mask', mask)
 	cv.imshow('Display HUD', hud)
 	t1 = time.time()
 	total = t1-t0
