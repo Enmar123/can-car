@@ -23,6 +23,7 @@ int a = 0;
 int mod_delay;
 int turnSpeed = 200;
 int fetch = 0;
+int halt = 1;
 
 // USER INPUTS --------------------------------------------
 
@@ -30,8 +31,8 @@ int fetch = 0;
 #define carspeed2 100
 #define turnSpeed1 200
 #define turnSpeed2 250
-#define delay1 100
-#define turntime 720              // ???=90deg on FIU floor
+#define delay1 75
+#define turntime 800              // ???=90deg on FIU floor
 #define forwardtime 2150
 
 int rightDistance = 0, leftDistance = 0, middleDistance = 0;
@@ -211,105 +212,121 @@ void loop() {
   
   // PI->INO Serial in 
   while(Serial.available()){
-  datain = char(Serial.read());
+    datain = char(Serial.read());
   }
+  
+  // Behavior Commands
+  if(datain == 'X'){        // Reset fetch counter
+    fetch = 0;
+  }
+  if(datain == 'S'){        // Stop car movement
+    halt = 1;
+  }
+  
+  
+  // Halting movement untill 'G' (go) Pressed 
+  while(halt == 1){
+    stop();
+    while(Serial.available()){
+      datain = char(Serial.read());
+    }
+    if(datain == 'G'){
+      halt = 0;
+    }
+  }
+  
   
   // VISION BEHAVIOR -----------------------
   
-  if(datain != 'O'){
-    Serial.println("-----VISION BEHAVIOR-----");
-  /*  
-    middleDistance = Distance_test();
-    
-    if(middleDistance <= 27){
-      stop();
-      
-      if (datain == 'M'){
-        open();
-        delay(500);
-        forward();
-        delay(500);
-        close();       
+  if(fetch == 0){
+    if(datain != 'O'){
+      Serial.println("-----VISION BEHAVIOR-----");
+  
+      if(datain == 'M'){
+        
+        middleDistance = Distance_test();
+        
+        if(middleDistance <= 27){
+          stop();
+          open();
+          delay(500);
+          forward();
+          delay(1000);
+          stop();
+          close();
+          delay(1000);
+          
+          turnSpeed = turnSpeed2;
+          right();
+          delay(turntime*2);
+          merge();
+          fetch = 1;
+        }
+        else{
+          forward();
+          Serial.println("Following forward!");
+        }
+      }
+      else if(datain == 'R'){
+        right();
+        Serial.println("Following Right!");
+      }
+      else if(datain == 'L'){
+        left();
+        Serial.println("Following left!");
       }
     }
-  */
-    if(datain == 'M'){
+  }
+      
+    // OBSTACLE AVOIDANCE---------------------
+ 
+  if(fetch == 0){
+    if(datain == 'O'){
       
       middleDistance = Distance_test();
+  
+      //if(fetch == 0)
+      if(middleDistance <= 27) {
+      Serial.println("-----AVOID BEHAVIOR-----");
       
-      if(middleDistance <= 27){
         stop();
-        open();
+        delay(500);                         
+        myservo.write(10);          
+        delay(1000);      
+        rightDistance = Distance_test();
+        
         delay(500);
-        forward();
-        delay(2000);
-        stop();
-        close();
+        myservo.write(90);     //initial 90/modified to 125         
+        delay(1000);                                                  
+        myservo.write(180);              
+        delay(1000); 
+        leftDistance = Distance_test();
+        
+        delay(500);
+        myservo.write(90);     //initial 90/modified to 125         
         delay(1000);
-        right();
-        delay(turntime*2);
-        merge();
-        fetch = 1;
+        
+        //Double checking incase object moved away
+        middleDistance = Distance_test(); 
+        
+        if(middleDistance <= 27){
+          if(rightDistance > leftDistance) {
+            avoidR();
+            merge();
+          }
+          else if(rightDistance < leftDistance) {
+            avoidL();
+            merge();
+          }
+          else if((rightDistance <= 20) || (leftDistance <= 20)) {
+            back();
+            delay(180);
+          }
+        }
       }
-      else{
-        forward();
-        Serial.println("Following forward!");
-      }
-    }
-    else if(datain == 'R'){
-      right();
-      Serial.println("Following Right!");
-    }
-    else if(datain == 'L'){
-      left();
-      Serial.println("Following left!");
     }
   }
-  else if(datain == 'O'){
-  // OBSTACLE AVOIDANCE---------------------
   
-  //myservo.write(90);  //(initial 90/modified to 125)setservo position according to scaled value
-  //delay(500); 
-  middleDistance = Distance_test();
-
-  if(middleDistance <= 27) {
-  Serial.println("-----AVOID BEHAVIOR-----");
-  
-      stop();
-      delay(500);                         
-      myservo.write(10);          
-      delay(1000);      
-      rightDistance = Distance_test();
-      
-      delay(500);
-      myservo.write(90);     //initial 90/modified to 125         
-      delay(1000);                                                  
-      myservo.write(180);              
-      delay(1000); 
-      leftDistance = Distance_test();
-      
-      delay(500);
-      myservo.write(90);     //initial 90/modified to 125         
-      delay(1000);
-      
-      //Double checking incase object moved away
-      middleDistance = Distance_test(); 
-      
-      if(middleDistance <= 27){
-        if(rightDistance > leftDistance) {
-          avoidR();
-          merge();
-        }
-        else if(rightDistance < leftDistance) {
-          avoidL();
-          merge();
-        }
-        else if((rightDistance <= 20) || (leftDistance <= 20)) {
-          back();
-          delay(180);
-        }
-      }
-  }
 
 // LINE TRACKING ----------------------
 
@@ -322,7 +339,7 @@ void loop() {
   }
   else if(LT_R==0 && LT_M==1 && LT_L==0){
     forward();
-    a=a-1;
+    a=a-2;
   }
   else if((LT_R==1 && LT_M==0 && LT_L==0) || (LT_R==1 && LT_M==1 && LT_L==0)) { 
     right();
@@ -332,16 +349,19 @@ void loop() {
   else if((LT_R==0 && LT_M==0 && LT_L==1) || (LT_R==0 && LT_M==1 && LT_L==1)) {
     left();
     a=a+1;
-    delay(mod_delay);  
+    delay(mod_delay);
+    forward();
+    delay(25);  
   }
   else if(LT_R==1 && LT_M==0 && LT_L==1) {  
     right();
     delay(delay1);
+    forward();
+    delay(25);
   }
   
-  forward();
-  delay(25);
-  }
+  //forward();
+  //delay(25);
 
 // Post Loop Calculations -------------
   
@@ -371,6 +391,7 @@ void loop() {
   Serial.println(datain);
   Serial.print("mod_delay = ");
   Serial.println(mod_delay);
-  Serial.print("middleDistance = ");
-  Serial.println(middleDistance);  
-}  
+  //Serial.print("middleDistance = ");
+  //Serial.println(middleDistance);  
+}
+

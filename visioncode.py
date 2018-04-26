@@ -133,7 +133,13 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 	
 	# PI->INO Char Data out
 	
-	if(x == -100):
+	if key == ord("x"):
+		dataout = 'X'		# reset fetch counter
+	elif key == ord("s"):
+		dataout = 'S'		# Stop car movement (stop)
+	elif key == ord("g"):	# Go car movement (go)
+		dataout = 'G'
+	elif(x == -100):
 		dataout = 'O'
 	elif(x >= (xmid+offset)):
 		dataout = 'L'
