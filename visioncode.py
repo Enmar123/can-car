@@ -94,7 +94,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
 	color1 = 0 * (179/360)				# Red Coca-Cola Can
 	color2 = 360 * (179/360)			# Red Coca-Cola Can
-	margin = 5
+	margin = 10
 	bound1_low = (color1 - margin, 80, 80)
 	bound1_up = (color1 + margin, 255, 255)
 	bound2_low = (color2 - margin, 80, 80)
@@ -103,8 +103,11 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 	mask2 = cv.inRange(hsv, bound2_low, bound2_up)
 	mask = mask1 + mask2
 
-	mask = cv.erode(mask, None, iterations = 2)
+	#mask = cv.erode(mask, None, iterations = 2)
+	#mask = cv.dilate(mask, None, iterations = 2)
+	
 	mask = cv.dilate(mask, None, iterations = 2)
+	mask = cv.erode(mask, None, iterations = 3)
 	
 	hud = image
 	

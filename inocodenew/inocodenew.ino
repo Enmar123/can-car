@@ -23,7 +23,8 @@ int a = 0;
 int mod_delay;
 int turnSpeed = 200;
 int fetch = 0;
-int halt = 1;
+int halt = 1;          //halt=0 -> Arduino runs on start
+                       //halt=1 -> Arduino waits for PI
 
 // USER INPUTS --------------------------------------------
 
@@ -204,7 +205,6 @@ void setup(){
 
 // Main Control Loop ------------------------------------------------
 
-// Note: Black line = 1 or high
 void loop() { 
   unsigned long loopstart = millis();
   
@@ -242,10 +242,12 @@ void loop() {
     if(datain != 'O'){
       Serial.println("-----VISION BEHAVIOR-----");
   
+      // decide behavour based on serial input
       if(datain == 'M'){
         
         middleDistance = Distance_test();
         
+        // if aligned and close -> crab can
         if(middleDistance <= 27){
           stop();
           open();
@@ -256,11 +258,13 @@ void loop() {
           close();
           delay(1000);
           
+          // activating things required to return
           turnSpeed = turnSpeed2;
           right();
           delay(turntime*2);
           merge();
-          fetch = 1;
+          fetch = 1;    // important: disables sonar & camera
+          datain = 'O'; // important: resets camera value
         }
         else{
           forward();
@@ -285,7 +289,7 @@ void loop() {
       
       middleDistance = Distance_test();
   
-      //if(fetch == 0)
+      // If obstacle in cars path
       if(middleDistance <= 27) {
       Serial.println("-----AVOID BEHAVIOR-----");
       
@@ -296,17 +300,17 @@ void loop() {
         rightDistance = Distance_test();
         
         delay(500);
-        myservo.write(90);     //initial 90/modified to 125         
+        myservo.write(90);             
         delay(1000);                                                  
         myservo.write(180);              
         delay(1000); 
         leftDistance = Distance_test();
         
         delay(500);
-        myservo.write(90);     //initial 90/modified to 125         
+        myservo.write(90);              
         delay(1000);
         
-        //Double checking incase object moved away
+        //Double checking incase obstacle moved away
         middleDistance = Distance_test(); 
         
         if(middleDistance <= 27){
@@ -330,41 +334,43 @@ void loop() {
 
 // LINE TRACKING ----------------------
 
-  Serial.println("-----LINE BEHAVIOR-----");
+  if(datain == 'O'){
   
-  unsigned long StartTime = millis();
-  
-  if((LT_R==0 && LT_M==0 && LT_L==0) || (LT_R==1 && LT_M==1 && LT_L==1)){
-    forward();
+    Serial.println("-----LINE BEHAVIOR-----");
+    
+    if((LT_R==0 && LT_M==0 && LT_L==0) || (LT_R==1 && LT_M==1 && LT_L==1)){
+      forward();
+    }
+    else if(LT_R==0 && LT_M==1 && LT_L==0){
+      forward();
+      a=a-2;
+    }
+    else if((LT_R==1 && LT_M==0 && LT_L==0) || (LT_R==1 && LT_M==1 && LT_L==0)) { 
+      right();
+      a=a+1;
+      delay(mod_delay);
+      forward();
+      delay(25);      
+    }   
+    else if((LT_R==0 && LT_M==0 && LT_L==1) || (LT_R==0 && LT_M==1 && LT_L==1)) {
+      left();
+      a=a+1;
+      delay(mod_delay);
+      forward();
+      delay(25);  
+    }
+    else if(LT_R==1 && LT_M==0 && LT_L==1) {  
+      right();
+      delay(delay1);
+    }
+    
+    //forward();
+    //delay(25);
   }
-  else if(LT_R==0 && LT_M==1 && LT_L==0){
-    forward();
-    a=a-2;
-  }
-  else if((LT_R==1 && LT_M==0 && LT_L==0) || (LT_R==1 && LT_M==1 && LT_L==0)) { 
-    right();
-    a=a+1;
-    delay(mod_delay);                             
-  }   
-  else if((LT_R==0 && LT_M==0 && LT_L==1) || (LT_R==0 && LT_M==1 && LT_L==1)) {
-    left();
-    a=a+1;
-    delay(mod_delay);
-    forward();
-    delay(25);  
-  }
-  else if(LT_R==1 && LT_M==0 && LT_L==1) {  
-    right();
-    delay(delay1);
-    forward();
-    delay(25);
-  }
-  
-  //forward();
-  //delay(25);
 
 // Post Loop Calculations -------------
   
+  // modified delay time incase of "sharp" turns
   if(a > 6){
     a = 6;
   }
@@ -374,9 +380,6 @@ void loop() {
   
   mod_delay = delay1 + a*25;
   
-  //unsigned long CurrentTime = millis();
-  //unsigned long ElapsedTime = CurrentTime - StartTime;
-  
   unsigned long loopend = millis();
   unsigned long looptime = loopend - loopstart;
   
@@ -385,8 +388,6 @@ void loop() {
   Serial.println("");
   Serial.print("looptime = ");
   Serial.println(looptime);
-  //Serial.println(ElapsedTime);
-  //Serial.println(CurrentTime);
   Serial.print("data in = ");
   Serial.println(datain);
   Serial.print("mod_delay = ");
