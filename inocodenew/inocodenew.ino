@@ -19,25 +19,34 @@ int Trig = A5;
 #define IN13 13
 
 char datain = 'O';
+
+int rightDistance = 0, leftDistance = 0, middleDistance = 0;
 int a = 0;
 int mod_delay;
-int turnSpeed = 200;
+int turnSpeed;
+int carSpeed;
 int fetch = 0;
+int go_track;
+int mergetick = 0;
 int halt = 1;          //halt=0 -> Arduino runs on start
                        //halt=1 -> Arduino waits for PI
 
 // USER INPUTS --------------------------------------------
 
-#define carSpeed 150
-#define carspeed2 100
+#define carSpeed1 150
+#define carSpeed2 100
+
 #define turnSpeed1 200
 #define turnSpeed2 250
 #define turnSpeed3 150            // 100 too low
+
+#define turntime 800       // 800~=90deg on FIU floor
+#define turn180 2400
+
 #define delay1 75
-#define turntime 800              // 800~=90deg on FIU floor
 #define forwardtime 2150
 
-int rightDistance = 0, leftDistance = 0, middleDistance = 0;
+#define mergetick1 10;
 
 
 
@@ -138,6 +147,8 @@ void stop() {
 }
 
 void merge() {
+  carSpeed = carSpeed2;
+  mergetick = mergetick1;
   int test = 0;
   while(test == 0){
     Serial.println("Merging!");
@@ -219,7 +230,9 @@ void setup(){
 void loop() { 
   unsigned long loopstart = millis();
   
+  carSpeed = carSpeed1;
   turnSpeed = turnSpeed1;
+  go_track = 1;
   
   // PI->INO Serial in 
   while(Serial.available()){
@@ -247,8 +260,8 @@ void loop() {
     if(datain == 'G'){
       halt = 0;
     }
+    delay(100);
   }
-  xs
   
   // VISION BEHAVIOR -----------------------
   
@@ -257,6 +270,7 @@ void loop() {
       Serial.println("-----VISION BEHAVIOR-----");
       
       turnSpeed = turnSpeed3;
+      go_track = 0;
   
       // decide behavour based on serial input
       if(datain == 'M'){
@@ -275,7 +289,7 @@ void loop() {
             // activating things required to return
             turnSpeed = turnSpeed2;
             right();
-            delay(turntime*2 + 100);
+            delay(turn180);
             merge();
             fetch = 1;    // important: disables sonar & camera
             datain = 'O'; // important: resets camera value
@@ -360,7 +374,13 @@ void loop() {
 
 // LINE TRACKING ----------------------
 
-  if(datain == 'O'){
+  if(go_track = 1){
+    
+    // merge at a certain speed for 'mergetick' loops
+    if(mergetick > 0){
+      carSpeed = carSpeed2;
+      mergetick = mergetick-1;
+    }
   
     Serial.println("-----LINE BEHAVIOR-----");
     
@@ -388,10 +408,9 @@ void loop() {
     else if(LT_R==1 && LT_M==0 && LT_L==1) {  
       right();
       delay(delay1);
+      forward();
+      delay(25);  
     }
-    
-    //forward();
-    //delay(25);
   }
 
 // Post Loop Calculations -------------
