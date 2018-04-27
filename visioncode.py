@@ -11,7 +11,7 @@ frame_h_pix = 480
 #pix_width  = 640
 #pix_height = 480
 
-safezone_pix = 100
+safezone_pix = 80
 
 hudcolor = (255,255,255)
 

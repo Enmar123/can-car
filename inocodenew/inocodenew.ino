@@ -42,12 +42,12 @@ int halt = 1;          //halt=0 -> Arduino runs on start
 #define turnSpeed3 150            // 100 too low
 
 #define turntime 600       // 600~=90deg on FIU floor
-#define turn180 1200        
+#define turn180 1600        
 
 #define delay1 75
 #define forwardtime 2150
 
-#define mergetick1 10;
+#define mergetick1 20;
 
 
 
@@ -154,7 +154,15 @@ void merge() {
   while(test == 0){
     Serial.println("Merging!");
     forward();
-    if(LT_R==1 || LT_M==1 || LT_L==1){  //LT_R==1 || LT_M==1 || LT_L==1
+    delay(50);
+    if(LT_R==1){  //LT_R==1 || LT_M==1 || LT_L==1
+      left();
+      delay(turntime/2);
+      test = 1;
+    }
+    else if(LT_L==1){
+      right();
+      delay(turntime/2);
       test = 1;
     }
   }
@@ -196,7 +204,7 @@ void grab(){
   open();
   delay(500);
   forward();
-  delay(1000);
+  delay(1500);
   stop();
   close();
   delay(1000);
@@ -382,7 +390,7 @@ void loop() {
     if(mergetick > 0){
       carSpeed = carSpeed2;
       mergetick = mergetick-1;
-      inverse = 1;
+      inverse = 0;              // inverse = 1 inverts controls
     }
   
     Serial.println("-----LINE BEHAVIOR-----");
