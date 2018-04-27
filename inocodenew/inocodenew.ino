@@ -28,6 +28,7 @@ int carSpeed;
 int fetch = 0;
 int go_track;
 int mergetick = 0;
+int inverse;
 int halt = 1;          //halt=0 -> Arduino runs on start
                        //halt=1 -> Arduino waits for PI
 
@@ -40,8 +41,8 @@ int halt = 1;          //halt=0 -> Arduino runs on start
 #define turnSpeed2 250
 #define turnSpeed3 150            // 100 too low
 
-#define turntime 800       // 800~=90deg on FIU floor
-#define turn180 2400
+#define turntime 600       // 600~=90deg on FIU floor
+#define turn180 1200        
 
 #define delay1 75
 #define forwardtime 2150
@@ -153,7 +154,7 @@ void merge() {
   while(test == 0){
     Serial.println("Merging!");
     forward();
-    if(LT_M==1){
+    if(LT_R==1 || LT_M==1 || LT_L==1){  //LT_R==1 || LT_M==1 || LT_L==1
       test = 1;
     }
   }
@@ -233,6 +234,7 @@ void loop() {
   carSpeed = carSpeed1;
   turnSpeed = turnSpeed1;
   go_track = 1;
+  inverse = 0;
   
   // PI->INO Serial in 
   while(Serial.available()){
@@ -374,12 +376,13 @@ void loop() {
 
 // LINE TRACKING ----------------------
 
-  if(go_track = 1){
+  if(go_track == 1){
     
     // merge at a certain speed for 'mergetick' loops
     if(mergetick > 0){
       carSpeed = carSpeed2;
       mergetick = mergetick-1;
+      inverse = 1;
     }
   
     Serial.println("-----LINE BEHAVIOR-----");
@@ -392,14 +395,24 @@ void loop() {
       a=a-2;
     }
     else if((LT_R==1 && LT_M==0 && LT_L==0) || (LT_R==1 && LT_M==1 && LT_L==0)) { 
-      right();
+      if(inverse == 1){
+        left();
+      }
+      else{
+        right();
+      }
       a=a+1;
       delay(mod_delay);
       forward();
       delay(25);      
     }   
     else if((LT_R==0 && LT_M==0 && LT_L==1) || (LT_R==0 && LT_M==1 && LT_L==1)) {
-      left();
+      if(inverse == 1){
+        right();
+      }
+      else{
+        left();
+      }
       a=a+1;
       delay(mod_delay);
       forward();
