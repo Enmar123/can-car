@@ -32,8 +32,9 @@ int halt = 1;          //halt=0 -> Arduino runs on start
 #define carspeed2 100
 #define turnSpeed1 200
 #define turnSpeed2 250
+#define turnSpeed3 150            // 100 too low
 #define delay1 75
-#define turntime 800              // ???=90deg on FIU floor
+#define turntime 800              // 800~=90deg on FIU floor
 #define forwardtime 2150
 
 int rightDistance = 0, leftDistance = 0, middleDistance = 0;
@@ -177,7 +178,17 @@ void open() {
   delay(2200);
   digitalWrite(IN12, LOW);
   digitalWrite(IN13, LOW);
-} 
+}
+
+void grab(){
+  open();
+  delay(500);
+  forward();
+  delay(1000);
+  stop();
+  close();
+  delay(1000);
+}
 
 //----------------------------------------------------------------
 
@@ -230,17 +241,22 @@ void loop() {
     while(Serial.available()){
       datain = char(Serial.read());
     }
+    if(datain == 'X'){        // Reset fetch counter
+      fetch = 0;
+    }
     if(datain == 'G'){
       halt = 0;
     }
   }
-  
+  xs
   
   // VISION BEHAVIOR -----------------------
   
   if(fetch == 0){
     if(datain != 'O'){
       Serial.println("-----VISION BEHAVIOR-----");
+      
+      turnSpeed = turnSpeed3;
   
       // decide behavour based on serial input
       if(datain == 'M'){
@@ -250,21 +266,25 @@ void loop() {
         // if aligned and close -> crab can
         if(middleDistance <= 27){
           stop();
-          open();
-          delay(500);
-          forward();
-          delay(1000);
-          stop();
-          close();
-          delay(1000);
+          grab();
           
-          // activating things required to return
-          turnSpeed = turnSpeed2;
-          right();
-          delay(turntime*2);
-          merge();
-          fetch = 1;    // important: disables sonar & camera
-          datain = 'O'; // important: resets camera value
+          middleDistance = Distance_test();
+          
+          if(middleDistance <= 27){ 
+        
+            // activating things required to return
+            turnSpeed = turnSpeed2;
+            right();
+            delay(turntime*2 + 100);
+            merge();
+            fetch = 1;    // important: disables sonar & camera
+            datain = 'O'; // important: resets camera value
+          }
+          else{
+            back();
+            delay(2000);
+            
+          }
         }
         else{
           forward();
@@ -273,10 +293,16 @@ void loop() {
       }
       else if(datain == 'R'){
         right();
+        delay(25);
+        forward();
+        delay(25);
         Serial.println("Following Right!");
       }
       else if(datain == 'L'){
         left();
+        delay(25);
+        forward();
+        delay(25);
         Serial.println("Following left!");
       }
     }
